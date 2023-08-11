@@ -26,6 +26,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.navigation.ui.theme.bottomnavigation.bottomNaviagtionItems
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -38,65 +39,10 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text("Navigation")
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        coroutineScope.launch {
-                            drawerState.open()
-                        }
-                    }) {
-                        Icon(Icons.Filled.Menu, null)
-                    }
-                },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            )
+            TopAppBar(coroutineScope, drawerState)
         },
         bottomBar = {
-            NavigationBar(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                bottomNaviagtionItems.forEach { item ->
-
-                    val selected = item.route == backStackEntry.value?.destination?.route
-
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = { homeNavController.navigate(item.route) },
-                        label = {
-                            val textStyle = if (selected) {
-                                MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                )
-                            } else {
-                                MaterialTheme.typography.titleSmall
-                            }
-                            Text(
-                                text = item.name,
-                                style = textStyle
-                            )
-                        },
-                        icon = {
-                            val tint = if (selected) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.secondary
-                            }
-                            Icon(
-                                tint = tint,
-                                imageVector = item.icon,
-                                contentDescription = "${item.name} Icon",
-                            )
-                        }
-                    )
-                }
-            }
+            BottomAppBar(backStackEntry, homeNavController)
         }
     ) { paddingValues ->
         Surface(
@@ -116,5 +62,77 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+private fun BottomAppBar(
+    backStackEntry: State<NavBackStackEntry?>,
+    homeNavController: NavHostController
+) {
+    NavigationBar(
+        modifier = Modifier
+            .fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.primaryContainer
+    ) {
+        bottomNaviagtionItems.forEach { item ->
+
+            val selected = item.route == backStackEntry.value?.destination?.route
+
+            NavigationBarItem(
+                selected = selected,
+                onClick = { homeNavController.navigate(item.route) },
+                label = {
+                    val textStyle = if (selected) {
+                        MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        MaterialTheme.typography.titleSmall
+                    }
+                    Text(
+                        text = item.name,
+                        style = textStyle
+                    )
+                },
+                icon = {
+                    val tint = if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.secondary
+                    }
+                    Icon(
+                        tint = tint,
+                        imageVector = item.icon,
+                        contentDescription = "${item.name} Icon",
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TopAppBar(
+    coroutineScope: CoroutineScope,
+    drawerState: DrawerState
+) {
+    TopAppBar(
+        title = {
+            Text("Navigation")
+        },
+        navigationIcon = {
+            IconButton(onClick = {
+                coroutineScope.launch {
+                    drawerState.open()
+                }
+            }) {
+                Icon(Icons.Filled.Menu, null)
+            }
+        },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        )
+    )
 }
 
